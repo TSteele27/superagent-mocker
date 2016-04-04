@@ -131,7 +131,7 @@ function mock(superagent) {
     if (!state.current) {
       return oldSend.call(this, data);
     }
-    state.request.body = mergeObjects(state.current.body, data);
+    state.request.body = mergeRouteBodies(state.current.body, data);
     return this;
   };
 
@@ -221,16 +221,25 @@ Route.prototype.match = function(method, url, body) {
     return route.handler({
       url: url,
       params: params || {},
-      body: mergeObjects(body, req.body),
+      body: mergeRouteBodies(body, req.body),
       headers: req.headers
     });
   };
 };
 
 
+
 /**
  * Helpers
  */
+
+ function mergeRouteBodies(baseBody, reqBody){
+   if(!isObject(reqBody)){
+     return reqBody;
+   }else{
+     return mergeObjects(baseBody, reqBody);
+   }
+ }
 
 /**
  * Simple object test
@@ -238,7 +247,7 @@ Route.prototype.match = function(method, url, body) {
  * @return bool True if variable is an object
  */
 function isObject(obj) {
-  return null != obj && 'object' == typeof obj;
+  return null != obj && 'object' == typeof obj && !Array.isArray(obj);
 }
 
 /**
